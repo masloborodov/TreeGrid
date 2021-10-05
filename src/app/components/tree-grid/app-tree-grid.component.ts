@@ -67,7 +67,17 @@ export class AppTreeGridComponent {
     }
   ];
 
+  public columns: Record<string, any>[] = [
+    { field: 'country', text: 'Country' },
+    { field: 'firstName', text: 'First Name' },
+    { field: 'lastName', text: 'Last Name' },
+    { field: 'gender', text: 'Gender' },
+    { field: 'age', text: 'Age' },
+    { field: 'email', text: 'Email' }
+  ];
+
   public minWidths: Record<string, number> = {};
+  public hiddenColumns: string[] = [];
   private readonly CONFIGURABLE_PROPS: string[] = [
     'fontSize', 'color', 'backgroundColor', 'textAlign', 'overflowWrap', 'minWidth'
   ];
@@ -83,6 +93,22 @@ export class AppTreeGridComponent {
 
   get contextMenuCells(): NodeListOf<HTMLElement> {
     return this.document.querySelectorAll(`[aria-colindex="${this.contextMenuColindex}"]:not(th)`);
+  }
+
+  toggleColVisibility(col: string): void {
+    if (this.isColHidden(col)) {
+      this.treeGridObj?.showColumns(col);
+      this.hiddenColumns = this.hiddenColumns.filter((item) => {
+        return item !== col;
+      });
+    } else {
+      this.treeGridObj?.hideColumns(col);
+      this.hiddenColumns = [...this.hiddenColumns, col];
+    }
+  }
+
+  isColHidden(col: string): boolean {
+    return this.hiddenColumns.includes(col);
   }
 
   private setPropsToContextMenuCells(prop: string, value: string | null): void {

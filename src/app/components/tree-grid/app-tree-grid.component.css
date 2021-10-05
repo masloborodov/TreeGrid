@@ -1,3 +1,19 @@
 .main{
   font-size: 12px;
 }
+
+.visibility-settings {
+  display: flex;
+  align-items: baseline;
+}
+
+.visibility-settings__title {
+  margin-right: 1.5rem;
+  font-weight: bold;
+}
+
+.visibility-settings__item {
+  margin-right: 1rem;
+  display: flex;
+  align-items: center;
+}

@@ -1,4 +1,17 @@
-<div class="main" style="background-color: brown">
+<div class="main">
+  <div class="visibility-settings">
+    <p class="visibility-settings__title">Columns visibility: </p>
+    <div class="visibility-settings__item" *ngFor="let item of ['country', 'firstName', 'lastName', 'gender', 'age', 'email']"
+    >
+      <label [for]="'toggle-hide-' + item">{{ item }}</label>
+      <input
+        [id]="'toggle-hide-' + item"
+        type="checkbox"
+        [checked]="!isColHidden(item)"
+        (click)="toggleColVisibility(item)"
+      >
+    </div>
+  </div>
   <ejs-treegrid #treegrid [dataSource]='data$ | async'
                 childMapping='users' height=90vh
                 [allowResizing]='true' [allowSorting]='true'
@@ -13,12 +26,13 @@
 
   >
     <e-columns>
-      <e-column field='country' headerText='Country' width=200 [minWidth]="minWidths[0]"></e-column>
-      <e-column field='firstName' headerText='First Name' width=200 [minWidth]="minWidths[1]"></e-column>
-      <e-column field='lastName' headerText='Last Name' width=200 [minWidth]="minWidths[2]"></e-column>
-      <e-column field='gender' headerText='Gender' width=200 [minWidth]="minWidths[3]"></e-column>
-      <e-column field='age' headerText='Age' width=100 [minWidth]="minWidths[4]"></e-column>
-      <e-column field='email' headerText='Email' width=200 [minWidth]="minWidths[5]"></e-column>
+      <e-column
+        *ngFor="let col of columns; let i = index"
+        [field]="col.field"
+        [headerText]="col.headerText"
+        width="200"
+        [minWidth]="minWidths[i]"
+      ></e-column>
     </e-columns>
   </ejs-treegrid>
 </div>

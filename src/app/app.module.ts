@@ -36,7 +36,7 @@ import { ContextMenuModule } from '@syncfusion/ej2-angular-navigations';
     ExcelExportService,
     PdfExportService, ContextMenuService,
     ToolbarService,
-    RowDDService
+    RowDDService,
   ],
   bootstrap: [AppComponent]
 })

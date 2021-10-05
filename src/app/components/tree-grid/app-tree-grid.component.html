@@ -1,7 +1,7 @@
 <div class="main">
   <div class="visibility-settings">
     <p class="visibility-settings__title">Columns visibility: </p>
-    <div class="visibility-settings__item" *ngFor="let item of ['country', 'firstName', 'lastName', 'gender', 'age', 'email']"
+    <div class="visibility-settings__item" *ngFor="let item of ['Country', 'First Name', 'Last Name', 'Gender', 'Age', 'Email']"
     >
       <label [for]="'toggle-hide-' + item">{{ item }}</label>
       <input
@@ -13,7 +13,7 @@
     </div>
   </div>
   <ejs-treegrid #treegrid [dataSource]='data$ | async'
-                childMapping='users' height=90vh
+                childMapping='users' height="85vh"
                 [allowResizing]='true' [allowSorting]='true'
                 [contextMenuItems]='contextMenuItems'
                 [treeColumnIndex]='1'

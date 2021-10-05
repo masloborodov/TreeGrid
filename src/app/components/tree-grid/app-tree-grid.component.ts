@@ -20,7 +20,11 @@ export class AppTreeGridComponent {
 
   public readonly data$: Observable<ICountryTree[]> = this.usersService.getAll();
   public readonly contextMenuItems: Object[]  =  [
+    'AddRow',
+    'Copy',
+    'Edit',
     'Delete',
+
     { text: 'Font size',
       target: '.e-gridheader',
       id: 'fontSize',

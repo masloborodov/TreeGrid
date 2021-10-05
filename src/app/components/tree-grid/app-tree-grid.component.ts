@@ -32,8 +32,20 @@ export class AppTreeGridComponent implements OnInit {
     {
       text: 'Background color',
       target: '.e-gridheader',
-      id: 'backgroundColor_',
+      id: 'backgroundColor',
       items: ['Lightblue', 'Red', 'Green', 'Black'].map((item) => ({ text: item, id: `backgroundColor_${item}` }))
+    },
+    {
+      text: 'Alignment',
+      target: '.e-gridheader',
+      id: 'text-align',
+      items: ['Left', 'Right', 'Center'].map((item) => ({ text: item, id: `text-align_${item}` }))
+    },
+    {
+      text: 'Text wrap',
+      target: '.e-gridheader',
+      id: 'overflowWrap',
+      items: ['normal', 'break-word', 'anywhere'].map((item) => ({ text: item, id: `overflowWrap_${item}` }))
     },
     {
       text: 'Default',
@@ -41,11 +53,9 @@ export class AppTreeGridComponent implements OnInit {
       id: 'default',
     }
   ]
-  private readonly CONFIGURABLE_PROPS: Record<string, string> = {
-    fontSize: '13px',
-    color: 'rgba(0, 0, 0, 0.87)',
-    backgroundColor: 'white'
-  };
+  private readonly CONFIGURABLE_PROPS: string[] = [
+    'fontSize', 'color', 'backgroundColor', 'textAlign', 'overflowWrap'
+  ];
   private contextMenuColindex: number | null = null;
 
   constructor(
@@ -58,7 +68,7 @@ export class AppTreeGridComponent implements OnInit {
     return this.document.querySelectorAll(`[aria-colindex="${this.contextMenuColindex}"]:not(th)`);
   }
 
-  private setPropsToContextMenuCells(prop: string, value: string): void {
+  private setPropsToContextMenuCells(prop: string, value: string | null): void {
     // @ts-ignore
     this.contextMenuCells.forEach(item => (item as HTMLElement).style[prop] = value)
   }
@@ -72,8 +82,8 @@ export class AppTreeGridComponent implements OnInit {
     const { id } = args.item;
 
     if (id === 'default') {
-      Object.entries(this.CONFIGURABLE_PROPS).forEach(([prop, value]) => {
-        this.setPropsToContextMenuCells(prop, value);
+      this.CONFIGURABLE_PROPS.forEach((prop) => {
+        this.setPropsToContextMenuCells(prop, null);
       })
       return;
     }

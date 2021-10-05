@@ -48,13 +48,21 @@ export class AppTreeGridComponent implements OnInit {
       items: ['normal', 'break-word', 'anywhere'].map((item) => ({ text: item, id: `overflowWrap_${item}` }))
     },
     {
+      text: 'Min width',
+      target: '.e-gridheader',
+      id: 'minWidth',
+      items: [50, 100, 150, 200].map((item) => ({ text: item, id: `minWidth_${item}` }))
+    },
+    {
       text: 'Default',
       target: '.e-gridheader',
       id: 'default',
     }
-  ]
+  ];
+
+  public minWidths: Record<string, number> = {};
   private readonly CONFIGURABLE_PROPS: string[] = [
-    'fontSize', 'color', 'backgroundColor', 'textAlign', 'overflowWrap'
+    'fontSize', 'color', 'backgroundColor', 'textAlign', 'overflowWrap', 'minWidth'
   ];
   private contextMenuColindex: number | null = null;
 
@@ -69,6 +77,13 @@ export class AppTreeGridComponent implements OnInit {
   }
 
   private setPropsToContextMenuCells(prop: string, value: string | null): void {
+    const idx = this.contextMenuColindex;
+
+    if (prop === 'minWidth' && idx) {
+      value
+        ? this.minWidths = { ...this.minWidths, [idx]: value }
+        : delete this.minWidths[idx];
+    }
     // @ts-ignore
     this.contextMenuCells.forEach(item => (item as HTMLElement).style[prop] = value)
   }

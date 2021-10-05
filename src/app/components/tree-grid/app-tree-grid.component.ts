@@ -12,12 +12,15 @@ import { DOCUMENT } from '@angular/common';
   templateUrl: './app-tree-grid.component.html',
   styleUrls: ['./app-tree-grid.component.css'],
 })
-export class AppTreeGridComponent implements OnInit {
+export class AppTreeGridComponent {
   @ViewChild('treegrid')
   public treeGridObj: TreeGridComponent | undefined;
+  public readonly editSettings = { allowEditing: true, allowAdding: true, allowDeleting: true, mode: 'Cell' };
 
-  public data$: Observable<ICountryTree[]> = this.usersService.getAll();
-  public contextMenuItems: Object[]  =  [
+
+  public readonly data$: Observable<ICountryTree[]> = this.usersService.getAll();
+  public readonly contextMenuItems: Object[]  =  [
+    'Delete',
     {text: 'Font size',
       target: '.e-gridheader',
       id: 'fontSize',
@@ -118,6 +121,12 @@ export class AppTreeGridComponent implements OnInit {
     }
   }
 
-  ngOnInit(): void {
+  onActionComplete(event: any) {
+    const { requestType, data } = event;
+    if (requestType === 'delete') {
+      const { _id } = data[0];
+      const { country } = data[0].parentItem;
+      this.usersService.deleteById(_id, country).subscribe();
+    }
   }
 }

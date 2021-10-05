@@ -1,6 +1,8 @@
 <div class="main" style="background-color: brown">
   <ejs-treegrid #treegrid [dataSource]='data$ | async' [treeColumnIndex]='1' childMapping='users' height=93vh
                 [allowResizing]='true' [allowSorting]='true'  [contextMenuItems]='contextMenuItems' [treeColumnIndex]='1'
+                [editSettings]='editSettings'
+                (actionComplete)="onActionComplete($event)"
                 (contextMenuClick)='contextMenuClick($event)' (contextMenuOpen)='contextMenuOpen($event)'
   >
     <e-columns>

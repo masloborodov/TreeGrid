@@ -30,7 +30,7 @@
       <e-column
         *ngFor="let col of columns; let i = index"
         [field]="col.field"
-        [headerText]="col.headerText"
+        [headerText]="col.text"
         width="200"
         [minWidth]="minWidths[i]"
       ></e-column>

@@ -122,11 +122,19 @@ export class AppTreeGridComponent {
   }
 
   onActionComplete(event: any) {
-    const { requestType, data } = event;
+    const { type, requestType, data } = event;
+
     if (requestType === 'delete') {
       const { _id } = data[0];
       const { country } = data[0].parentItem;
-      this.usersService.deleteById(_id, country).subscribe();
+
+      this.usersService.delete(_id, country).subscribe();
+    } else if (type === 'save') {
+      const { _id } = data;
+      const { country } = data.parentItem;
+      const { field } = event.column;
+
+      this.usersService.update(_id, country, { [field]: data[field] }).subscribe();
     }
   }
 }

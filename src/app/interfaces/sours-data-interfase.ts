@@ -1,4 +1,4 @@
-export interface IUsers {
+export interface IUser {
   index: number,
   _id: string,
   firstName: string,
@@ -16,7 +16,7 @@ export interface IUsers {
 
 export interface ICountryTree{
   country: string,
-  users: IUsers[]
+  users: IUser[]
 }
 
 export interface ITasks{

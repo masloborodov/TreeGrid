@@ -1,13 +1,24 @@
-export interface SoursData{
-  city: string,
-  country: string,
-  currency: string,
-  email: string,
-  first_name: string,
+export interface IUsers {
+  index: number,
+  _id: string,
+  firstName: string,
+  lastName: string,
+  isActive: boolean,
   gender: string,
-  id: number
-  ip_address: string,
-  language: string,
-  last_name: string,
+  email: string,
   phone: string,
+  age: number,
+  company: string,
+  city: string,
+  guid: string,
+  registered: string
+}
+
+export interface ICountryTree{
+  country: string,
+  users: IUsers[]
+}
+
+export interface ITasks{
+
 }

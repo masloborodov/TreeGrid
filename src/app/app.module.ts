@@ -2,27 +2,39 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing.module';
-
 import { AppComponent } from './app.component';
-import { TreeGridComponent } from './components/tree-grid/tree-grid.component';
-
-import { TreeGridModule } from '@syncfusion/ej2-angular-treegrid';
+import { AppTreeGridComponent } from './components/tree-grid/app-tree-grid.component';
+import {
+  ContextMenuService,
+  EditService,
+  ExcelExportService, PdfExportService,
+  ResizeService, ToolbarService,
+  TreeGridModule
+} from '@syncfusion/ej2-angular-treegrid';
 import { PageService, SortService, FilterService } from '@syncfusion/ej2-angular-treegrid';
+import { ContextMenuModule } from '@syncfusion/ej2-angular-navigations';
+
 @NgModule({
   declarations: [
     AppComponent,
-    TreeGridComponent
+    AppTreeGridComponent,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     TreeGridModule,
-    HttpClientModule
+    HttpClientModule,
+    ContextMenuModule
   ],
   providers: [
     PageService,
     SortService,
-    FilterService
+    FilterService,
+    EditService,
+    SortService, ResizeService,
+    ExcelExportService,
+    PdfExportService, ContextMenuService,
+    ToolbarService
   ],
   bootstrap: [AppComponent]
 })

@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit, ViewChild } from '@angular/core';
-import { SoursDataService } from '../../services/sours-data.service';
+import { UsersService } from '../../services/users.service';
 import { ICountryTree } from '../../interfaces/sours-data-interfase';
 import { Observable } from 'rxjs';
 import { BeforeOpenCloseEventArgs } from '@syncfusion/ej2-inputs';
@@ -15,8 +15,8 @@ import { DOCUMENT } from '@angular/common';
 export class AppTreeGridComponent implements OnInit {
   @ViewChild('treegrid')
   public treeGridObj: TreeGridComponent | undefined;
-  public editSettings: Object = {allowEditing: true, allowAdding: true, allowDeleting: true, mode:"Row"};
-  public data: Observable<ICountryTree[]> = this.soursData.getData().pipe();
+
+  public data$: Observable<ICountryTree[]> = this.usersService.getAll();
   public contextMenuItems: Object[]  =  [
     {text: 'Font size',
       target: '.e-gridheader',
@@ -59,7 +59,7 @@ export class AppTreeGridComponent implements OnInit {
   private contextMenuColindex: number | null = null;
 
   constructor(
-    private soursData: SoursDataService,
+    private usersService: UsersService,
     @Inject(DOCUMENT) private document: Document
   ) {
   }

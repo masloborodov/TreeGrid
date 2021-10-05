@@ -7,7 +7,7 @@ import { AppTreeGridComponent } from './components/tree-grid/app-tree-grid.compo
 import {
   ContextMenuService,
   EditService,
-  ExcelExportService, PdfExportService,
+  ExcelExportService, FreezeService, PdfExportService,
   ResizeService, ToolbarService,
   TreeGridModule
 } from '@syncfusion/ej2-angular-treegrid';
@@ -31,6 +31,7 @@ import { ContextMenuModule } from '@syncfusion/ej2-angular-navigations';
     SortService,
     FilterService,
     EditService,
+    FreezeService,
     SortService, ResizeService,
     ExcelExportService,
     PdfExportService, ContextMenuService,

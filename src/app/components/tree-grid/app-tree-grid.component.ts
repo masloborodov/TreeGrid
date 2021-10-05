@@ -21,7 +21,7 @@ export class AppTreeGridComponent {
   public readonly data$: Observable<ICountryTree[]> = this.usersService.getAll();
   public readonly contextMenuItems: Object[]  =  [
     'Delete',
-    {text: 'Font size',
+    { text: 'Font size',
       target: '.e-gridheader',
       id: 'fontSize',
       items: [10, 12, 14, 16].map((item) => ({ text: `${item}px`, id: `fontSize_${item}px` }))
@@ -60,6 +60,10 @@ export class AppTreeGridComponent {
       text: 'Default',
       target: '.e-gridheader',
       id: 'default',
+    },
+    { text: 'Freeze/unfreeze',
+      target: '.e-gridheader',
+      id: 'freezing',
     }
   ];
 
@@ -68,6 +72,8 @@ export class AppTreeGridComponent {
     'fontSize', 'color', 'backgroundColor', 'textAlign', 'overflowWrap', 'minWidth'
   ];
   private contextMenuColindex: number | null = null;
+
+  frozenColumns: number = 0;
 
   constructor(
     private usersService: UsersService,
@@ -98,6 +104,12 @@ export class AppTreeGridComponent {
 
 
     const { id } = args.item;
+
+    if (id === 'freezing') {
+      const newFrozenColumns = (this.contextMenuColindex || 0) + 1;
+      this.frozenColumns = newFrozenColumns === this.frozenColumns ? 0 : newFrozenColumns;
+      return;
+    }
 
     if (id === 'default') {
       this.CONFIGURABLE_PROPS.forEach((prop) => {

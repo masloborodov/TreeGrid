@@ -1,5 +1,5 @@
-.main{
-  font-size: 12px;
+::ng-deep tr.row-to-paste {
+  background: pink !important;
 }
 
 .visibility-settings {

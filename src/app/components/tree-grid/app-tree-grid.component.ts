@@ -160,6 +160,18 @@ export class AppTreeGridComponent {
     this.contextMenuCells.forEach(item => (item as HTMLElement).style[prop] = value)
   }
 
+  private toggleRowToPasteCls(flag: boolean): void {
+    if (flag) {
+      this.toggleRowToPasteCls(false);
+    }
+    const cls = 'row-to-paste';
+    const selectorPostfix = flag ? '[aria-selected="true"]' : `.${cls}`;
+    const els = this.document.querySelectorAll(`tr${selectorPostfix}`);
+    els.forEach((item) => {
+      flag ? item.classList.add(cls) : item.classList.remove(cls)
+    });
+  }
+
   contextMenuClick(args?: MenuEventArgs): void {
     if (!this.treeGridObj || !args?.item?.id) {
       return;
@@ -183,6 +195,7 @@ export class AppTreeGridComponent {
 
     if (['copy', 'cut'].includes(id)) {
       this.itemsToPast = this.treeGridObj.getSelectedRecords();
+      this.toggleRowToPasteCls(true);
       this.pasteMode = id as PasteMode;
     }
 
@@ -191,15 +204,17 @@ export class AppTreeGridComponent {
       const [, position] = id.split('_');
       if (this.pasteMode === 'cut') {
         const fromIndexes = this.itemsToPast.map(({ index }) => index);
+        this.toggleRowToPasteCls(false);
         return this.treeGridObj.reorderRows(fromIndexes, this.contextMenuRowIndex, position);
       }
-      const toPos = { 'below': 'Below', 'above': 'Above' }[position] || 'Below';
-
-
-      this.itemsToPast.forEach((item, idx) => {
-        const toIndex = (this.contextMenuRowIndex || 0) + idx;
-        this.treeGridObj?.addRecord(item, toIndex, toPos as RowPosition);
-      });
+      // const toPos = { 'below': 'Below', 'above': 'Above' }[position] || 'Below';
+      //
+      // this.itemsToPast.forEach((item, idx) => {
+      //   const toIndex = (this.contextMenuRowIndex || 0) + idx;
+      //   this.toggleRowToPasteCls(false);
+      //   this.treeGridObj?.addRecord(item, toIndex, toPos as RowPosition);
+      // });
+      this.toggleRowToPasteCls(false);
       return;
     }
     const [type, value] = id.split('_');

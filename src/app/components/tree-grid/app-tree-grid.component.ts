@@ -4,8 +4,15 @@ import { ICountryTree } from '../../interfaces/sours-data-interfase';
 import { Observable } from 'rxjs';
 import { BeforeOpenCloseEventArgs } from '@syncfusion/ej2-inputs';
 import { MenuEventArgs } from '@syncfusion/ej2-navigations';
-import { EditSettingsModel, SelectionSettingsModel, TreeGridComponent } from '@syncfusion/ej2-angular-treegrid';
+import {
+  EditSettingsModel,
+  RowPosition,
+  SelectionSettingsModel,
+  TreeGridComponent
+} from '@syncfusion/ej2-angular-treegrid';
 import { DOCUMENT } from '@angular/common';
+
+type PasteMode = 'copy' | 'cut' | null;
 
 @Component({
   selector: 'app-tree-grid',
@@ -16,7 +23,12 @@ export class AppTreeGridComponent {
 
   @ViewChild('treegrid')
   public treeGridObj: TreeGridComponent | undefined;
-  public readonly editSettings: EditSettingsModel  = { allowEditing: true, allowAdding: true, allowDeleting: true, mode: 'Cell' };
+  public readonly editSettings: EditSettingsModel  = {
+    allowEditing: true,
+    allowAdding: true,
+    allowDeleting: true,
+    mode: 'Cell'
+  };
   public readonly selectionSetting: SelectionSettingsModel = { type: 'Multiple', mode: 'Row' };
   public readonly data$: Observable<ICountryTree[]> = this.usersService.getAll();
   public readonly contextMenuItems: Object[]  =  [
@@ -108,6 +120,7 @@ export class AppTreeGridComponent {
   private contextMenuColindex: number | null = null;
   private contextMenuRowIndex: number | null = null;
   private itemsToPast: any[] = []
+  private pasteMode: PasteMode = null;
 
   constructor(
     private usersService: UsersService,
@@ -168,18 +181,26 @@ export class AppTreeGridComponent {
       return;
     }
 
-    if (id === 'copy') {
-      this.itemsToPast = this.treeGridObj.getSelectedRecords()
+    if (['copy', 'cut'].includes(id)) {
+      this.itemsToPast = this.treeGridObj.getSelectedRecords();
+      this.pasteMode = id as PasteMode;
     }
 
-    if (id === 'cut') {
-      this.itemsToPast = this.treeGridObj.getSelectedRecords()
-    }
 
     if (['paste_above', 'paste_below'].includes(id) && this.contextMenuRowIndex) {
       const [, position] = id.split('_');
-      const fromIndexes = this.itemsToPast.map(({ index }) => index);
-      this.treeGridObj.reorderRows(fromIndexes, this.contextMenuRowIndex, position);
+      if (this.pasteMode === 'cut') {
+        const fromIndexes = this.itemsToPast.map(({ index }) => index);
+        return this.treeGridObj.reorderRows(fromIndexes, this.contextMenuRowIndex, position);
+      }
+      const toPos = { 'below': 'Below', 'above': 'Above' }[position] || 'Below';
+
+
+      this.itemsToPast.forEach((item, idx) => {
+        const toIndex = (this.contextMenuRowIndex || 0) + idx;
+        this.treeGridObj?.addRecord(item, toIndex, toPos as RowPosition);
+      });
+      return;
     }
     const [type, value] = id.split('_');
 

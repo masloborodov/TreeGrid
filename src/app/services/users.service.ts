@@ -39,16 +39,17 @@ export class UsersService {
     );
   }
 
-  public delete(id: string, country: string): Observable<ICountryTree[]> {
+  public delete(entitiesMap: Record<string, string[]>): Observable<ICountryTree[]> {
     return this.http.get<ICountryTree[]>(this.URL).pipe(
       map((data) => {
-        return data.map(elem => {
-          if (elem.country !== country) {
-            return elem;
+        return data.map((item) => {
+          if (!entitiesMap.hasOwnProperty(item.country)) {
+            return item;
           }
+          const idsToRemove = entitiesMap[item.country];
           return {
-            ...elem,
-            users: elem.users.filter((item) => item._id !== id)
+            ...item,
+            users: item.users.filter((item) => !idsToRemove.includes(item._id))
           };
         });
       }),

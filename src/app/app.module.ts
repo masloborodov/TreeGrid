@@ -8,7 +8,7 @@ import {
   ContextMenuService,
   EditService,
   ExcelExportService, FreezeService, PdfExportService,
-  ResizeService, RowDDService, ToolbarService,
+  ResizeService, RowDDService, SelectionService, ToolbarService,
   TreeGridModule
 } from '@syncfusion/ej2-angular-treegrid';
 import { PageService, SortService, FilterService } from '@syncfusion/ej2-angular-treegrid';
@@ -37,6 +37,7 @@ import { ContextMenuModule } from '@syncfusion/ej2-angular-navigations';
     PdfExportService, ContextMenuService,
     ToolbarService,
     RowDDService,
+    SelectionService
   ],
   bootstrap: [AppComponent]
 })

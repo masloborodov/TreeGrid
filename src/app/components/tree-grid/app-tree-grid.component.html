@@ -20,11 +20,11 @@
                 [editSettings]='editSettings'
                 [allowFiltering]='true'
                 [allowRowDragAndDrop]='true'
+                [selectionSettings]="selectionSetting"
                 [frozenColumns]='frozenColumns'
                 (actionComplete)="onActionComplete($event)"
                 (contextMenuClick)='contextMenuClick($event)'
                 (contextMenuOpen)='contextMenuOpen($event)'
-
   >
     <e-columns>
       <e-column

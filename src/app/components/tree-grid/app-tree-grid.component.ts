@@ -1,10 +1,10 @@
-import { Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { Component, Inject, ViewChild } from '@angular/core';
 import { UsersService } from '../../services/users.service';
 import { ICountryTree } from '../../interfaces/sours-data-interfase';
 import { Observable } from 'rxjs';
 import { BeforeOpenCloseEventArgs } from '@syncfusion/ej2-inputs';
 import { MenuEventArgs } from '@syncfusion/ej2-navigations';
-import { TreeGridComponent } from '@syncfusion/ej2-angular-treegrid';
+import { EditSettingsModel, SelectionSettingsModel, TreeGridComponent } from '@syncfusion/ej2-angular-treegrid';
 import { DOCUMENT } from '@angular/common';
 
 @Component({
@@ -13,18 +13,16 @@ import { DOCUMENT } from '@angular/common';
   styleUrls: ['./app-tree-grid.component.css'],
 })
 export class AppTreeGridComponent {
+
   @ViewChild('treegrid')
   public treeGridObj: TreeGridComponent | undefined;
-  public readonly editSettings = { allowEditing: true, allowAdding: true, allowDeleting: true, mode: 'Cell' };
-
-
+  public readonly editSettings: EditSettingsModel  = { allowEditing: true, allowAdding: true, allowDeleting: true, mode: 'Cell' };
+  public readonly selectionSetting: SelectionSettingsModel = { type: 'Multiple', mode: 'Row' };
   public readonly data$: Observable<ICountryTree[]> = this.usersService.getAll();
   public readonly contextMenuItems: Object[]  =  [
     'AddRow',
-    'Copy',
     'Edit',
     'Delete',
-
     { text: 'Font size',
       target: '.e-gridheader',
       id: 'fontSize',
@@ -68,9 +66,20 @@ export class AppTreeGridComponent {
     { text: 'Freeze/unfreeze',
       target: '.e-gridheader',
       id: 'freezing',
+    },
+    { text: 'Copy',
+      target: '.e-content',
+      id: 'copy',
+    },
+    { text: 'Cut',
+      target: '.e-content',
+      id: 'cut',
+    },
+    { text: 'Paste',
+      target: '.e-content',
+      id: 'paste',
     }
   ];
-
   public columns: Record<string, any>[] = [
     { field: 'country', text: 'Country' },
     { field: 'firstName', text: 'First Name' },
@@ -79,15 +88,15 @@ export class AppTreeGridComponent {
     { field: 'age', text: 'Age' },
     { field: 'email', text: 'Email' }
   ];
-
   public minWidths: Record<string, number> = {};
   public hiddenColumns: string[] = [];
+  public frozenColumns: number = 0;
+
   private readonly CONFIGURABLE_PROPS: string[] = [
     'fontSize', 'color', 'backgroundColor', 'textAlign', 'overflowWrap', 'minWidth'
   ];
   private contextMenuColindex: number | null = null;
-
-  frozenColumns: number = 0;
+  private selectedRecords: Object[] = []
 
   constructor(
     private usersService: UsersService,
@@ -148,6 +157,17 @@ export class AppTreeGridComponent {
       return;
     }
 
+    if (id === 'copy') {
+      this.selectedRecords = this.treeGridObj.getSelectedRecords()
+    }
+
+    if (id === 'cut') {
+      this.selectedRecords = this.treeGridObj.getSelectedRecords()
+    }
+
+    if (id === 'paste') {
+
+    }
     const [type, value] = id.split('_');
 
     this.setPropsToContextMenuCells(type, value);
@@ -165,12 +185,17 @@ export class AppTreeGridComponent {
 
   onActionComplete(event: any) {
     const { type, requestType, data } = event;
-
     if (requestType === 'delete') {
-      const { _id } = data[0];
-      const { country } = data[0].parentItem;
+      const mapToRemove = data.reduce((resultMap: Record<string, string[]>, currentItem: any) => {
+        const { _id } = currentItem;
+        const { country } = currentItem.parentItem;
+        return {
+          ...resultMap,
+          [country]: resultMap[country] ? [...resultMap[country], _id] : [_id]
+        };
+      }, {});
 
-      this.usersService.delete(_id, country).subscribe();
+      this.usersService.delete(mapToRemove).subscribe();
     } else if (type === 'save') {
       const { _id } = data;
       const { country } = data.parentItem;

@@ -78,6 +78,16 @@ export class AppTreeGridComponent {
     { text: 'Paste',
       target: '.e-content',
       id: 'paste',
+      items: [
+        {
+          text: 'Above',
+          id: 'paste_above',
+        },
+        {
+          text: 'Below',
+          id: 'paste_below',
+        }
+      ]
     }
   ];
   public columns: Record<string, any>[] = [
@@ -96,7 +106,8 @@ export class AppTreeGridComponent {
     'fontSize', 'color', 'backgroundColor', 'textAlign', 'overflowWrap', 'minWidth'
   ];
   private contextMenuColindex: number | null = null;
-  private selectedRecords: Object[] = []
+  private contextMenuRowIndex: number | null = null;
+  private itemsToPast: any[] = []
 
   constructor(
     private usersService: UsersService,
@@ -158,44 +169,55 @@ export class AppTreeGridComponent {
     }
 
     if (id === 'copy') {
-      this.selectedRecords = this.treeGridObj.getSelectedRecords()
+      this.itemsToPast = this.treeGridObj.getSelectedRecords()
     }
 
     if (id === 'cut') {
-      this.selectedRecords = this.treeGridObj.getSelectedRecords()
+      this.itemsToPast = this.treeGridObj.getSelectedRecords()
     }
 
-    if (id === 'paste') {
-
+    if (['paste_above', 'paste_below'].includes(id) && this.contextMenuRowIndex) {
+      const [, position] = id.split('_');
+      const fromIndexes = this.itemsToPast.map(({ index }) => index);
+      this.treeGridObj.reorderRows(fromIndexes, this.contextMenuRowIndex, position);
     }
     const [type, value] = id.split('_');
 
     this.setPropsToContextMenuCells(type, value);
   }
 
-  contextMenuOpen(arg?: BeforeOpenCloseEventArgs){
+  deleteRecords(data: any): void{
+    const mapToRemove = data.reduce((resultMap: Record<string, string[]>, currentItem: any) => {
+      const { _id } = currentItem;
+      const { country } = currentItem.parentItem;
+      return {
+        ...resultMap,
+        [country]: resultMap[country] ? [...resultMap[country], _id] : [_id]
+      };
+    }, {});
+
+    this.usersService.delete(mapToRemove).subscribe();
+  }
+
+  contextMenuOpen(arg?: BeforeOpenCloseEventArgs): void{
     if(arg){
       const elem: Element = arg.event.target as Element;
       const colindex = elem.closest('.e-headercell')?.getAttribute('aria-colindex')
+      const rowindex = elem.closest('.e-row')?.getAttribute('aria-rowindex');
+
       if(colindex){
         this.contextMenuColindex = Number(colindex)
+      }
+      if(rowindex) {
+        this.contextMenuRowIndex = Number(rowindex);
       }
     }
   }
 
-  onActionComplete(event: any) {
+  onActionComplete(event: any): void {
     const { type, requestType, data } = event;
     if (requestType === 'delete') {
-      const mapToRemove = data.reduce((resultMap: Record<string, string[]>, currentItem: any) => {
-        const { _id } = currentItem;
-        const { country } = currentItem.parentItem;
-        return {
-          ...resultMap,
-          [country]: resultMap[country] ? [...resultMap[country], _id] : [_id]
-        };
-      }, {});
-
-      this.usersService.delete(mapToRemove).subscribe();
+      this.deleteRecords(data)
     } else if (type === 'save') {
       const { _id } = data;
       const { country } = data.parentItem;

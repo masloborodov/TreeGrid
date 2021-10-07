@@ -12,7 +12,7 @@
       >
     </div>
   </div>
-  <ejs-treegrid #treegrid [dataSource]='data$ | async'
+  <ejs-treegrid #treegrid [dataSource]='data' *ngIf="data"
                 childMapping='users' height="85vh"
                 [allowResizing]='true' [allowSorting]='true'
                 [contextMenuItems]='contextMenuItems'

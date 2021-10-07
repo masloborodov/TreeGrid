@@ -16,6 +16,47 @@ export class UsersService {
     return this.http.get<ICountryTree[]>(this.URL)
   }
 
+  public movePosition(ids: string[], toIndex: number, position: 'above' | 'below', country: string): Observable<ICountryTree[]> {
+    return this.http.get<ICountryTree[]>(this.URL).pipe(
+      map((data) => {
+        const removed = []
+
+        return data.map(elem => {
+          if (elem.country !== country) {
+            return elem;
+          }
+
+          const usersList: (IUser | null)[] = [...elem.users];
+          const usersToMove: (IUser | null)[] = [];
+          usersList.forEach((user, idx) => {
+            if (user?._id && ids.includes(user._id)) {
+              usersToMove.push(user);
+              usersList[idx] = null;
+            }
+          });
+
+          const leftUsers = usersList.slice(0, toIndex);
+          const rightUsers = usersList.slice(toIndex);
+          const midUser = leftUsers.pop();
+
+          const newUserListWithNull = position === 'above'
+            ? [...leftUsers, ...usersToMove, midUser, ...rightUsers]
+            : [...leftUsers, midUser, ...usersToMove, ...rightUsers]
+
+          const newUserList = newUserListWithNull.filter(Boolean);
+
+          return {
+            ...elem,
+            users: newUserList
+          }
+        })
+      }),
+      switchMap((body) => {
+        return this.http.post<ICountryTree[]>(this.URL, body);
+      })
+    );
+  }
+
   public update(id: string, country: string, dto: Partial<IUser>): Observable<ICountryTree[]> {
     return this.http.get<ICountryTree[]>(this.URL).pipe(
       map((data) => {

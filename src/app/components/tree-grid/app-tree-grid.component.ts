@@ -1,16 +1,15 @@
 import { Component, Inject, ViewChild } from '@angular/core';
 import { UsersService } from '../../services/users.service';
 import { ICountryTree } from '../../interfaces/sours-data-interfase';
-import { Observable } from 'rxjs';
 import { BeforeOpenCloseEventArgs } from '@syncfusion/ej2-inputs';
 import { MenuEventArgs } from '@syncfusion/ej2-navigations';
 import {
   EditSettingsModel,
-  RowPosition,
   SelectionSettingsModel,
   TreeGridComponent
 } from '@syncfusion/ej2-angular-treegrid';
 import { DOCUMENT } from '@angular/common';
+import { take } from 'rxjs/operators';
 
 type PasteMode = 'copy' | 'cut' | null;
 
@@ -30,7 +29,7 @@ export class AppTreeGridComponent {
     mode: 'Cell'
   };
   public readonly selectionSetting: SelectionSettingsModel = { type: 'Multiple', mode: 'Row' };
-  public readonly data$: Observable<ICountryTree[]> = this.usersService.getAll();
+  public data: ICountryTree[] | null = [];
   public readonly contextMenuItems: Object[]  =  [
     'AddRow',
     'Edit',
@@ -126,6 +125,9 @@ export class AppTreeGridComponent {
     private usersService: UsersService,
     @Inject(DOCUMENT) private document: Document
   ) {
+    this.usersService.getAll().pipe(
+      take(1),
+    ).subscribe((data) => this.data = data);
   }
 
   get contextMenuCells(): NodeListOf<HTMLElement> {
@@ -203,10 +205,26 @@ export class AppTreeGridComponent {
     if (['paste_above', 'paste_below'].includes(id) && this.contextMenuRowIndex) {
       const [, position] = id.split('_');
       if (this.pasteMode === 'cut') {
-        const fromIndexes = this.itemsToPast.map(({ index }) => index);
+        const fromIndexes = this.itemsToPast.map(({ index, _id }) => index);
+        const itemIdToReplace = this.itemsToPast.map(({ _id }) => _id);
         this.toggleRowToPasteCls(false);
-        return this.treeGridObj.reorderRows(fromIndexes, this.contextMenuRowIndex, position);
-      }
+        this.treeGridObj.reorderRows(fromIndexes, this.contextMenuRowIndex, position);
+        this.treeGridObj.getColumnFieldNames()
+        this.usersService.movePosition(itemIdToReplace, this.contextMenuRowIndex, position as 'above' | 'below', 'Philippines').subscribe();
+      };
+
+
+      // if (this.data){
+      //   this.usersService.resetAll(this.data).subscribe(res => {
+      //     console.log("resetAll", this.data)
+      //   });
+      // };
+      // this.data = null;
+      // this.usersService.getAll().subscribe((data) => {
+      //   console.log(data)
+      //   this.data = data;
+      // });
+
       // const toPos = { 'below': 'Below', 'above': 'Above' }[position] || 'Below';
       //
       // this.itemsToPast.forEach((item, idx) => {
@@ -214,7 +232,7 @@ export class AppTreeGridComponent {
       //   this.toggleRowToPasteCls(false);
       //   this.treeGridObj?.addRecord(item, toIndex, toPos as RowPosition);
       // });
-      this.toggleRowToPasteCls(false);
+      // this.toggleRowToPasteCls(false);
       return;
     }
     const [type, value] = id.split('_');
@@ -258,7 +276,6 @@ export class AppTreeGridComponent {
       const { _id } = data;
       const { country } = data.parentItem;
       const { field } = event.column;
-
       this.usersService.update(_id, country, { [field]: data[field] }).subscribe();
     }
   }

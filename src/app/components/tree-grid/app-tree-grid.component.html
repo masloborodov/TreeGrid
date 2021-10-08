@@ -23,6 +23,7 @@
                 [allowReordering]="true"
                 [allowRowDragAndDrop]='true'
                 [selectionSettings]="selectionSetting"
+                (rowSelected)="rowSelecting($event)"
                 [frozenColumns]='frozenColumns'
                 (actionComplete)="onActionComplete($event)"
                 (contextMenuClick)='contextMenuClick($event)'

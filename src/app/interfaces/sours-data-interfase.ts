@@ -19,6 +19,7 @@ export interface ICountryTree{
   users: IUser[]
 }
 
-export interface ITasks{
-
+export interface IPasteIds{
+  id: string[],
+  newId: string[]
 }

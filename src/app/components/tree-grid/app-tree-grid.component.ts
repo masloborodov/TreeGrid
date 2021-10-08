@@ -1,15 +1,18 @@
 import { Component, Inject, ViewChild } from '@angular/core';
 import { UsersService } from '../../services/users.service';
-import { ICountryTree } from '../../interfaces/sours-data-interfase';
+import { ICountryTree, IPasteIds } from '../../interfaces/sours-data-interfase';
 import { BeforeOpenCloseEventArgs } from '@syncfusion/ej2-inputs';
 import { MenuEventArgs } from '@syncfusion/ej2-navigations';
 import {
-  EditSettingsModel,
+  EditSettingsModel, RowPosition,
   SelectionSettingsModel,
   TreeGridComponent
 } from '@syncfusion/ej2-angular-treegrid';
 import { DOCUMENT } from '@angular/common';
 import { take } from 'rxjs/operators';
+// @ts-ignore
+import { v4 as uuid } from 'uuid';
+
 
 type PasteMode = 'copy' | 'cut' | null;
 
@@ -97,6 +100,10 @@ export class AppTreeGridComponent {
         {
           text: 'Below',
           id: 'paste_below',
+        },
+        {
+          text: 'Child',
+          id: 'paste_child'
         }
       ]
     }
@@ -196,43 +203,37 @@ export class AppTreeGridComponent {
     }
 
     if (['copy', 'cut'].includes(id)) {
-      this.itemsToPast = this.treeGridObj.getSelectedRecords();
+      this.itemsToPast = this.treeGridObj?.getSelectedRecords().filter(elem => !('expanded' in elem));
       this.toggleRowToPasteCls(true);
       this.pasteMode = id as PasteMode;
     }
 
 
-    if (['paste_above', 'paste_below'].includes(id) && this.contextMenuRowIndex) {
+    if (['paste_above', 'paste_below', 'paste_child'].includes(id) && this.contextMenuRowIndex) {
       const [, position] = id.split('_');
-      if (this.pasteMode === 'cut') {
-        const fromIndexes = this.itemsToPast.map(({ index, _id }) => index);
-        const itemIdToReplace = this.itemsToPast.map(({ _id }) => _id);
-        this.toggleRowToPasteCls(false);
+      const fromIndexes = this.itemsToPast.map(({ index }) => index);
+      const ids = this.itemsToPast.map(({ _id }) => _id)
+      const newItemsToPast = this.itemsToPast.map((elem) => ({
+        ...elem,
+        _id: uuid()
+      }))
+      const newItemIds: IPasteIds = {
+        id: ids,
+        newId: newItemsToPast.map(({ _id }) => _id)
+      }
+      if (this.pasteMode === 'copy'){
+        const pos = {
+          above: 'Above',
+          below: 'Below'
+        }[position] || 'Child';
+        this.treeGridObj.addRecord(newItemsToPast, this.contextMenuRowIndex, pos as RowPosition);
+      } else if (this.pasteMode === 'cut') {
         this.treeGridObj.reorderRows(fromIndexes, this.contextMenuRowIndex, position);
-        this.treeGridObj.getColumnFieldNames()
-        this.usersService.movePosition(itemIdToReplace, this.contextMenuRowIndex, position as 'above' | 'below', 'Philippines').subscribe();
-      };
-
-
-      // if (this.data){
-      //   this.usersService.resetAll(this.data).subscribe(res => {
-      //     console.log("resetAll", this.data)
-      //   });
-      // };
-      // this.data = null;
-      // this.usersService.getAll().subscribe((data) => {
-      //   console.log(data)
-      //   this.data = data;
-      // });
-
-      // const toPos = { 'below': 'Below', 'above': 'Above' }[position] || 'Below';
-      //
-      // this.itemsToPast.forEach((item, idx) => {
-      //   const toIndex = (this.contextMenuRowIndex || 0) + idx;
-      //   this.toggleRowToPasteCls(false);
-      //   this.treeGridObj?.addRecord(item, toIndex, toPos as RowPosition);
-      // });
-      // this.toggleRowToPasteCls(false);
+      }
+      if (this.pasteMode){
+        this.usersService.movePosition(newItemIds, this.contextMenuRowIndex, position as 'above' | 'below' | 'child', 'Philippines', this.pasteMode).subscribe();
+      }
+      this.toggleRowToPasteCls(false);
       return;
     }
     const [type, value] = id.split('_');
@@ -253,11 +254,35 @@ export class AppTreeGridComponent {
     this.usersService.delete(mapToRemove).subscribe();
   }
 
+  private adjustMenuItemsVisibility(): void {
+    const isParentClicked = this.treeGridObj
+      ?.getSelectedRecords()
+      .some((item: any) => item.hasChildRecords);
+
+    const setDisplay = (selector: string, value: string): void => {
+      const el = (this.document.querySelector(selector) as HTMLElement);
+      if (el) {
+        el.style.display = value;
+      }
+    }
+
+    ['#copy', '#cut', '#paste_above', '#paste_below']
+      .map((item) => `li${item}`)
+      .forEach((selector) => setDisplay(selector, isParentClicked ? 'none' : 'block'));
+
+    setDisplay('li#paste_child', isParentClicked ? 'block' : 'none');
+  }
+
   contextMenuOpen(arg?: BeforeOpenCloseEventArgs): void{
+    this.adjustMenuItemsVisibility();
+
     if(arg){
       const elem: Element = arg.event.target as Element;
+      const targetRow = elem.closest('.e-row')
+
+
       const colindex = elem.closest('.e-headercell')?.getAttribute('aria-colindex')
-      const rowindex = elem.closest('.e-row')?.getAttribute('aria-rowindex');
+      const rowindex = targetRow?.getAttribute('aria-rowindex');
 
       if(colindex){
         this.contextMenuColindex = Number(colindex)
@@ -267,7 +292,12 @@ export class AppTreeGridComponent {
       }
     }
   }
-
+  rowSelecting(event: any): void {
+    const elem: Element = event.row as Element;
+    if(elem?.getAttribute('aria-expanded')) {
+      elem.setAttribute('aria-selected', 'false')
+    }
+  }
   onActionComplete(event: any): void {
     const { type, requestType, data } = event;
     if (requestType === 'delete') {
